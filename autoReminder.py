@@ -6,6 +6,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as Alert
 from webdriver_manager.chrome import ChromeDriverManager
 import time
+import winsound
 
 options = Options()
 
@@ -30,9 +31,9 @@ url = 'https://www.cgv.co.kr/'
 user_id = 'kkgm94'
 user_password = 'rudALS3922!'
 movie_name = '아바타-물의길'
-state = '서울' #지역뒤에 꼭 괄호를 붙여야 영화이름 중 서울이 들어간 것에서 오류 안남
+state = '서울' 
 city = '왕십리'
-movie_date = '20221221'
+movie_date = '20221224'
 
 def login():
     driver.get(url)
@@ -58,22 +59,35 @@ def cheakSeat():
     time.sleep(0.1) 
     driver.switch_to.window(driver.window_handles[-1])
     driver.find_element(By.XPATH,'//*[@id="ticket"]/div[1]/span/a[3]').click()
-    time.sleep(0.1) 
+    time.sleep(0.2) 
     driver.find_element(By.CSS_SELECTOR, f"[title='{movie_name}']").click()
+    time.sleep(0.2) 
     driver.find_element(By.PARTIAL_LINK_TEXT, f"{state}").click()
+    time.sleep(0.2) 
     driver.find_element(By.PARTIAL_LINK_TEXT, f"{city}").click()
+    time.sleep(0.2) 
     driver.find_element(By.CSS_SELECTOR, f"[date='{movie_date}']").click()
+    time.sleep(0.2) 
 
 def confirmSeat():
+    condition = 0
     try:
-        WebDriverWait(driver, 1).until(Alert.alert_is_present())
+        WebDriverWait(driver, 2).until(Alert.alert_is_present())
         alert = driver.switch_to.alert
         print (f"{movie_date}은 아직 예매불가입니다.")
         # 확인하기
         alert.accept()
+        condition = 1
     except:
         print(f"{movie_date}은 예매 가능합니다.")
-
+        # 알림음 재생
+        for _ in range(10):
+            winsound.Beep(
+                frequency=440,  # Hz
+                duration=1000  # milliseconds
+            )
+        condition = 2
+    return condition
 def close_window():
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
@@ -81,15 +95,25 @@ def close_window():
     driver.refresh()
 
 def main():
-
+    repeat = 0
+    cnt = 0 
     login()
     goReservation()
 
     while True:
         cheakSeat()
-        confirmSeat()
+        repeat = confirmSeat()
+        if repeat == 2:
+            break
         close_window()
         time.sleep(2) #2초에 한번씩 확인
+        if cnt == 300:
+            winsound.Beep(
+                frequency=440,  # Hz
+                duration=1000  # milliseconds
+            )
+            cnt = 0
+        cnt += 1
 
 if __name__== "__main__":
     main()
