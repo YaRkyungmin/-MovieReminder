@@ -25,14 +25,13 @@ options.add_argument("--start-maximized") # 최대 크기로 시작
 
 
 service = Service(ChromeDriverManager(path="Drivers").install()) #Drivers라는 폴더에 설치
-driver = webdriver.Chrome(service=service, options=options)
 
 url = 'https://www.cgv.co.kr/'
 user_id = 'kkgm94'
 user_password = 'rudALS3922!'
 movie_name = '아바타-물의길'
 state = '서울' 
-city = '왕십리'
+city = '영등포'
 movie_date = '20221224'
 
 def login():
@@ -59,22 +58,22 @@ def cheakSeat():
     time.sleep(0.1) 
     driver.switch_to.window(driver.window_handles[-1])
     driver.find_element(By.XPATH,'//*[@id="ticket"]/div[1]/span/a[3]').click()
-    time.sleep(0.2) 
+    time.sleep(0.5) 
     driver.find_element(By.CSS_SELECTOR, f"[title='{movie_name}']").click()
-    time.sleep(0.2) 
+    time.sleep(0.5) 
     driver.find_element(By.PARTIAL_LINK_TEXT, f"{state}").click()
-    time.sleep(0.2) 
+    time.sleep(0.5) 
     driver.find_element(By.PARTIAL_LINK_TEXT, f"{city}").click()
-    time.sleep(0.2) 
+    time.sleep(0.5) 
     driver.find_element(By.CSS_SELECTOR, f"[date='{movie_date}']").click()
-    time.sleep(0.2) 
+    time.sleep(0.5) 
 
-def confirmSeat():
+def confirmSeat(cnt):
     condition = 0
     try:
         WebDriverWait(driver, 2).until(Alert.alert_is_present())
         alert = driver.switch_to.alert
-        print (f"{movie_date}은 아직 예매불가입니다.")
+        print (f"{movie_date}은 아직 예매불가입니다.-{cnt}-")
         # 확인하기
         alert.accept()
         condition = 1
@@ -94,7 +93,7 @@ def close_window():
     time.sleep(0.5)
     driver.refresh()
 
-def main():
+def main(realend):
     repeat = 0
     cnt = 0 
     login()
@@ -102,18 +101,27 @@ def main():
 
     while True:
         cheakSeat()
-        repeat = confirmSeat()
+        repeat = confirmSeat(cnt)
         if repeat == 2:
+            realend = 1
             break
         close_window()
         time.sleep(2) #2초에 한번씩 확인
-        if cnt == 300:
+        if cnt == 300: cnt = 0
+        cnt += 1
+    return realend
+
+if __name__== "__main__":
+    while True:
+        realend = 0
+        try:
+            driver = webdriver.Chrome(service=service, options=options)
+            realend = main(realend)
+        except:
+            driver.quit()
             winsound.Beep(
                 frequency=440,  # Hz
                 duration=1000  # milliseconds
             )
-            cnt = 0
-        cnt += 1
-
-if __name__== "__main__":
-    main()
+        if (realend == 1):
+            break
