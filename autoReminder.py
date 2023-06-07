@@ -27,8 +27,8 @@ options.add_argument("--start-maximized") # 최대 크기로 시작
 service = Service(ChromeDriverManager(path="Drivers").install()) #Drivers라는 폴더에 설치
 
 url = 'https://www.cgv.co.kr/'
-user_id = 'kkgm94'
-user_password = 'rudALS3922!'
+user_id = 'shsnsb'
+user_password = 'hllowarld'
 movie_name = '아바타-물의길'
 state = '서울' 
 city = '영등포'
